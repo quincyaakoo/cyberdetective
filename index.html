@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кибердетектив</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2d3748;
+            --accent-color: #3182ce;
+            --danger-color: #e53e3e;
+            --safe-color: #38a169;
+            --warning-color: #d69e2e;
+            --light-color: #f7fafc;
+            --dark-color: #2d3748;
+            --card-bg: rgba(255, 255, 255, 0.97);
+            --terminal-bg: #1a202c;
+            --exhibit-border: #4a5568;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: var(--light-color);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .main-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+            flex-wrap: wrap;
+        }
+        .logo { display: flex; align-items: center; gap: 15px; }
+        .logo-icon { font-size: 2.2rem; color: var(--accent-color); }
+        .logo-text h1 { font-size: 1.7rem; color: white; }
+        .logo-text .subtitle { font-size: 0.85rem; color: #cbd5e0; }
+        .nav-links { display: flex; gap: 20px; flex-wrap: wrap; }
+        .nav-link {
+            color: #cbd5e0; text-decoration: none; font-weight: 500;
+            padding: 8px 15px; border-radius: 6px; transition: all 0.3s; cursor: pointer;
+        }
+        .nav-link:hover, .nav-link.active {
+            background: rgba(49,130,206,0.2); color: white;
+        }
+        .section { display: none; animation: fadeIn 0.4s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Hero */
+        .hero {
+            text-align: center; padding: 50px 20px;
+            background: rgba(26,32,44,0.7); border-radius: 15px;
+            margin-bottom: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        .hero h2 { font-size: 2.5rem; margin-bottom: 20px; color: #4299e1; }
+        .hero p { font-size: 1.1rem; max-width: 750px; margin: 0 auto 30px; color: #cbd5e0; }
+        .cta-buttons { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+
+        /* Buttons */
+        .btn {
+            padding: 13px 26px; border: none; border-radius: 8px; font-size: 1rem;
+            cursor: pointer; font-weight: 600; transition: all 0.3s;
+            display: inline-flex; align-items: center; gap: 10px;
+        }
+        .btn-primary { background: var(--accent-color); color: white; }
+        .btn-primary:hover { background: #2b6cb0; transform: translateY(-2px); }
+        .btn-secondary { background: #4a5568; color: white; }
+        .btn-secondary:hover { background: #2d3748; transform: translateY(-2px); }
+        .btn-success { background: var(--safe-color); color: white; }
+        .btn-success:hover { background: #2f855a; transform: translateY(-2px); }
+
+        /* Modules grid */
+        .modules-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px; margin-top: 40px;
+        }
+        .module-card {
+            background: var(--card-bg); border-radius: 12px; padding: 30px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15); transition: all 0.3s;
+            color: var(--dark-color); border-top: 5px solid var(--accent-color);
+        }
+        .module-card:hover { transform: translateY(-6px); box-shadow: 0 15px 30px rgba(0,0,0,0.25); }
+        .module-card.theory { border-top-color: var(--warning-color); }
+        .module-icon { font-size: 2.5rem; margin-bottom: 20px; color: var(--accent-color); }
+        .module-card.theory .module-icon { color: var(--warning-color); }
+        .module-title { font-size: 1.5rem; margin-bottom: 15px; color: var(--primary-color); }
+        .module-description { color: var(--secondary-color); margin-bottom: 20px; }
+
+        /* Theory section */
+        .theory-header { margin-bottom: 30px; }
+        .difficulty-filter { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
+        .difficulty-btn {
+            padding: 8px 20px; border: 2px solid #4a5568; background: transparent;
+            color: #cbd5e0; border-radius: 20px; cursor: pointer; font-weight: 500; transition: all 0.3s;
+        }
+        .difficulty-btn.active { background: var(--accent-color); border-color: var(--accent-color); color: white; }
+        .difficulty-btn.beginner.active { background: #38a169; border-color: #38a169; }
+        .difficulty-btn.advanced.active { background: #d69e2e; border-color: #d69e2e; }
+        .difficulty-btn.expert.active { background: #e53e3e; border-color: #e53e3e; }
+
+        .exhibits-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 25px; }
+        .exhibit {
+            background: var(--terminal-bg); border-radius: 12px; overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3); border: 2px solid var(--exhibit-border);
+            transition: all 0.3s;
+        }
+        .exhibit:hover { transform: translateY(-5px); border-color: var(--accent-color); }
+        .exhibit-header {
+            padding: 18px 20px; border-bottom: 1px solid var(--exhibit-border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .exhibit-title { font-size: 1.2rem; color: white; }
+        .exhibit-difficulty { padding: 4px 12px; border-radius: 15px; font-size: 0.8rem; font-weight: bold; }
+        .beginner-badge { background: rgba(56,161,105,0.2); color: #38a169; }
+        .advanced-badge { background: rgba(214,158,46,0.2); color: #d69e2e; }
+        .expert-badge { background: rgba(229,62,62,0.2); color: #e53e3e; }
+        .exhibit-content { padding: 20px; }
+
+        .phishing-email {
+            background: white; color: #2d3748; padding: 18px; border-radius: 8px;
+            margin-bottom: 20px; font-family: Arial, sans-serif; border: 1px solid #e2e8f0;
+            font-size: 0.95rem;
+        }
+        .email-header { border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 12px; }
+        .email-from { font-weight: bold; color: var(--danger-color); }
+        .email-subject { color: var(--primary-color); font-size: 1rem; margin: 8px 0; }
+
+        .hotspot {
+            background: rgba(229,62,62,0.1); border-left: 3px solid var(--danger-color);
+            padding: 10px 14px; margin: 12px 0; cursor: pointer; transition: all 0.3s;
+        }
+        .hotspot:hover { background: rgba(229,62,62,0.2); }
+        .hotspot-title {
+            font-weight: bold; color: var(--danger-color);
+            display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
+        }
+        .hotspot-description { color: var(--secondary-color); font-size: 0.88rem; }
+        .psychology-breakdown {
+            margin-top: 18px; padding: 14px;
+            background: rgba(49,130,206,0.1); border-radius: 8px;
+        }
+        .psychology-title {
+            font-weight: bold; color: var(--accent-color); margin-bottom: 8px;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        /* Arcade game */
+        .game-container {
+            background: var(--card-bg); border-radius: 15px;
+            padding: 30px; color: var(--dark-color); margin-top: 20px;
+        }
+        .game-instruction {
+            background: rgba(56,161,105,0.1); border-left: 4px solid var(--safe-color);
+            padding: 14px; border-radius: 8px; margin-bottom: 20px;
+        }
+        .game-stats {
+            display: flex; gap: 30px; justify-content: center;
+            margin-bottom: 25px; font-size: 1.2rem;
+        }
+        .game-emails { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin: 25px 0; }
+        .game-email-card {
+            background: white; border: 2px solid #e2e8f0; border-radius: 10px;
+            padding: 14px; width: 195px; cursor: pointer; transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); color: #2d3748;
+        }
+        .game-email-card:hover { transform: scale(1.05); border-color: var(--accent-color); }
+        .game-email-from { font-weight: bold; margin-bottom: 5px; font-size: 0.85rem; }
+        .game-email-subject { color: var(--primary-color); font-size: 0.9rem; margin-bottom: 5px; }
+        .game-email-body { font-size: 0.78rem; color: #4a5568; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .hidden { display: none !important; }
+
+        .footer {
+            text-align: center; padding: 30px 0; margin-top: 50px;
+            border-top: 1px solid rgba(255,255,255,0.1); color: #a0aec0; font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { justify-content: center; margin-top: 15px; }
+            .hero h2 { font-size: 1.8rem; }
+            .exhibits-grid { grid-template-columns: 1fr; }
+            .modules-grid { grid-template-columns: 1fr; }
+            .cta-buttons { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <nav class="main-nav">
+        <div class="logo">
+            <div class="logo-icon"><i class="fas fa-user-secret"></i></div>
+            <div class="logo-text">
+                <h1>Кибердетектив</h1>
+                <div class="subtitle">Образовательный курс по кибербезопасности</div>
+            </div>
+        </div>
+        <div class="nav-links">
+            <a href="#" class="nav-link active" data-section="home"><i class="fas fa-home"></i> Главная</a>
+            <a href="#" class="nav-link" data-section="theory"><i class="fas fa-book-open"></i> Теория</a>
+            <a href="#" class="nav-link" data-section="detective"><i class="fas fa-gamepad"></i> Расследование</a>
+        </div>
+    </nav>
+
+    <!-- Главная -->
+    <section id="home" class="section active">
+        <div class="hero">
+            <h2>Добро пожаловать в Кибердетектив</h2>
+            <p>Изучи, как работают фишинговые атаки, и проверь свои знания в бесконечном режиме расследования. Всё — в образовательных целях.</p>
+            <div class="cta-buttons">
+                <button class="btn btn-primary" data-section="theory">
+                    <i class="fas fa-book-open"></i> Изучить теорию
+                </button>
+                <button class="btn btn-success" data-section="detective">
+                    <i class="fas fa-gamepad"></i> Режим расследования
+                </button>
+            </div>
+        </div>
+
+        <div class="modules-grid">
+            <div class="module-card">
+                <div class="module-icon"><i class="fas fa-search"></i></div>
+                <h3 class="module-title">Теория фишинга</h3>
+                <p class="module-description">Разбор реальных фишинговых писем с объяснением каждого признака атаки. Изучи, как мошенники манипулируют жертвами.</p>
+                <ul style="color: var(--secondary-color); margin: 15px 0; padding-left: 20px;">
+                    <li>Примеры фишинговых писем с разбором</li>
+                    <li>Признаки поддельных доменов и ссылок</li>
+                    <li>Психологические приёмы атакующих</li>
+                    <li>Три уровня сложности</li>
+                </ul>
+                <button class="btn btn-primary" data-section="theory">Перейти к теории</button>
+            </div>
+
+            <div class="module-card theory">
+                <div class="module-icon"><i class="fas fa-gamepad"></i></div>
+                <h3 class="module-title">Бесконечный режим</h3>
+                <p class="module-description">На экране появляются письма — твоя задача кликать только на фишинговые. Одна ошибка с легитимным письмом — и игра заканчивается.</p>
+                <ul style="color: var(--secondary-color); margin: 15px 0; padding-left: 20px;">
+                    <li>Бесконечный поток писем</li>
+                    <li>Таймер на 30 секунд</li>
+                    <li>+10 очков за каждый верный ответ</li>
+                    <li>Практика распознавания фишинга</li>
+                </ul>
+                <button class="btn btn-success" data-section="detective">Начать игру</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Теория -->
+    <section id="theory" class="section">
+        <div class="theory-header">
+            <h2 style="font-size: 2rem; color: white; margin-bottom: 10px;">Теория: Как распознать фишинг</h2>
+            <p style="color: #cbd5e0; max-width: 800px;">Изучи примеры фишинговых писем. Нажимай на выделенные красным признаки, чтобы узнать, чем опасен каждый элемент.</p>
+            <div class="difficulty-filter">
+                <button class="difficulty-btn active" data-difficulty="all">Все примеры</button>
+                <button class="difficulty-btn beginner" data-difficulty="beginner">Начальный</button>
+                <button class="difficulty-btn advanced" data-difficulty="advanced">Средний</button>
+                <button class="difficulty-btn expert" data-difficulty="expert">Сложный</button>
+            </div>
+        </div>
+
+        <div class="exhibits-grid" id="exhibits-container"></div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <button class="btn btn-secondary" data-section="home">
+                <i class="fas fa-arrow-left"></i> На главную
+            </button>
+        </div>
+    </section>
+
+    <!-- Расследование (бесконечный режим) -->
+    <section id="detective" class="section">
+        <h2 style="font-size: 2rem; margin-bottom: 15px; color: white;">Бесконечный режим: Спаси сотрудника</h2>
+        <p style="margin-bottom: 30px; color: #cbd5e0; max-width: 800px;">На экране появляются входящие письма. Кликай на фишинговые, чтобы удалить их. Если кликнешь на настоящее письмо — игра закончится. Ориентируйся на домены отправителя, срочность и подозрительные ссылки.</p>
+
+        <div class="investigations-list">
+            <div style="text-align: center; margin: 30px 0;">
+                <button class="btn btn-success" style="font-size: 1.1rem; padding: 16px 32px;" onclick="startArcadeGame()">
+                    <i class="fas fa-play"></i> Начать игру
+                </button>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 25px; max-width: 700px; margin: 0 auto;">
+                <h3 style="color: #4299e1; margin-bottom: 15px;"><i class="fas fa-info-circle"></i> Как играть</h3>
+                <ul style="color: #cbd5e0; padding-left: 20px; line-height: 2;">
+                    <li>На экране появляются карточки с письмами</li>
+                    <li>Кликни на <strong style="color: #fc8181;">фишинговое</strong> письмо — оно удалится, ты получишь +10 очков</li>
+                    <li>Кликни на <strong style="color: #68d391;">настоящее</strong> письмо — игра закончится</li>
+                    <li>Таймер: 30 секунд. Успей набрать как можно больше очков</li>
+                    <li>Подсказка: смотри на домен отправителя и тему письма</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="btn btn-secondary" data-section="home">
+                <i class="fas fa-arrow-left"></i> На главную
+            </button>
+        </div>
+    </section>
+
+    <div class="footer">
+        <p>Кибердетектив | Образовательный курс по кибербезопасности</p>
+        <p style="margin-top: 8px;">Все материалы предназначены исключительно для образовательных целей</p>
+    </div>
+</div>
+
+<script>
+    // ==================== Навигация ====================
+    function setupNavigation() {
+        document.querySelectorAll('[data-section]').forEach(function(el) {
+            el.addEventListener('click', function(e) {
+                e.preventDefault();
+                var target = this.dataset.section;
+                showSection(target);
+            });
+        });
+    }
+
+    function showSection(sectionId) {
+        document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
+        document.querySelectorAll('.nav-link').forEach(function(l) { l.classList.remove('active'); });
+        var sec = document.getElementById(sectionId);
+        if (sec) sec.classList.add('active');
+        var link = document.querySelector('.nav-link[data-section="' + sectionId + '"]');
+        if (link) link.classList.add('active');
+    }
+
+    // ==================== База теоретических примеров ====================
+    var exhibitsDatabase = [
+        {
+            id: 1, title: "Фишинг от имени Netflix", difficulty: "beginner",
+            email: {
+                from: "account@netflix-service.com",
+                subject: "Требуется обновление платежной информации",
+                body: "Уважаемый пользователь Netflix,\n\nМы не смогли обработать ваш последний платеж. Чтобы не прерывать доступ, обновите платёжную информацию в течение 24 часов.\n\nПерейдите по ссылке: https://netflix-account-secure.com/update\n\nС уважением,\nСлужба поддержки Netflix"
+            },
+            hotspots: [
+                { title: "Поддельный домен отправителя", description: "netflix-service.com вместо официального netflix.com — классическая подмена домена." },
+                { title: "Искусственная срочность", description: "«В течение 24 часов» создаёт давление и заставляет действовать быстро, не проверяя письмо." },
+                { title: "Поддельная ссылка", description: "netflix-account-secure.com выглядит похоже на настоящий сайт, но им не является." }
+            ],
+            psychology: "Использует страх потери доступа к любимому сервису — жертва боится пропустить любимый контент."
+        },
+        {
+            id: 2, title: "Фишинг от имени Microsoft", difficulty: "advanced",
+            email: {
+                from: "microsoft-security@account-protection.com",
+                subject: "Обнаружена подозрительная активность в вашем аккаунте",
+                body: "Уведомление о безопасности Microsoft\n\nЗдравствуйте,\n\nМы обнаружили попытку входа в ваш аккаунт с незнакомого устройства в 04:23 (UTC). Если это были не вы, ваша учётная запись могла быть скомпрометирована.\n\nПодтвердите личность: https://microsoft-verification-center.com/secure\n\nЕсли не подтвердите в течение 12 часов — аккаунт будет ограничен.\n\nКоманда безопасности Microsoft"
+            },
+            hotspots: [
+                { title: "Поддельный адрес отправителя", description: "account-protection.com не имеет отношения к microsoft.com. Официальные письма Microsoft приходят только с @microsoft.com." },
+                { title: "Реалистичные детали", description: "Точное время (04:23 UTC) добавляет правдоподобности — люди меньше сомневаются, когда видят конкретику." },
+                { title: "Угроза ограничения", description: "Угроза блокировки аккаунта создаёт страх и желание немедленно «исправить ситуацию»." }
+            ],
+            psychology: "Эксплуатирует страх взлома аккаунта и потери доступа к важным рабочим данным."
+        },
+        {
+            id: 3, title: "Фишинг от имени службы доставки", difficulty: "beginner",
+            email: {
+                from: "no-reply@dhl-delivery.info",
+                subject: "Информация о вашей посылке №RU45879213",
+                body: "Уважаемый получатель,\n\nВаша посылка №RU45879213 ожидает получения. Для выдачи необходимо оплатить таможенный сбор: 245 руб.\n\nОплатите в течение 3 дней: https://dhl-payment-online.com/pay\n\nИначе посылка будет возвращена отправителю.\n\nСлужба доставки DHL"
+            },
+            hotspots: [
+                { title: "Поддельный домен", description: "dhl-delivery.info вместо официального dhl.com — домен зарегистрирован мошенниками специально для обмана." },
+                { title: "Реалистичный номер посылки", description: "Конкретный номер RU45879213 создаёт иллюзию настоящего отслеживания и снижает подозрительность." },
+                { title: "Маленькая сумма платежа", description: "245 руб. — небольшая сумма, поэтому жертва не слишком задумывается и платит, не проверяя." }
+            ],
+            psychology: "Использует любопытство: человек не ждёт посылку, но всё равно хочет разобраться, что это такое."
+        },
+        {
+            id: 4, title: "Фишинг от имени налоговой службы", difficulty: "expert",
+            email: {
+                from: "notification@fns-gov.ru",
+                subject: "Уведомление о переплате по налогам",
+                body: "Федеральная налоговая служба\n\nУважаемый налогоплательщик,\n\nПо данным учёта у вас образовалась переплата по НДФЛ за прошлый год: 8 567 руб.\n\nДля возврата заполните заявление: https://refund-fns.ru/application\n\nЗаявление необходимо подать до 25 декабря текущего года.\n\nС уважением,\nФедеральная налоговая служба"
+            },
+            hotspots: [
+                { title: "Имитация госоргана", description: "fns-gov.ru — поддельный домен. Настоящий сайт ФНС: nalog.gov.ru. Мошенники добавляют 'gov', чтобы выглядеть официально." },
+                { title: "Приманка: деньги", description: "Предложение получить деньги снижает бдительность — человек хочет верить хорошим новостям." },
+                { title: "Дедлайн", description: "«До 25 декабря» создаёт искусственное ощущение срочности и не даёт времени на проверку." }
+            ],
+            psychology: "Двойная манипуляция: доверие к государственным органам + желание получить деньги."
+        },
+        {
+            id: 5, title: "Корпоративный фишинг (CEO-фрод)", difficulty: "expert",
+            email: {
+                from: "ceo@c0mpany-corp.ru",
+                subject: "СРОЧНО: Выполните перевод до конца дня",
+                body: "Всем сотрудникам финансового отдела,\n\nТребуется срочно выполнить денежный перевод поставщику. Это приоритетная задача — завершить до конца рабочего дня.\n\nДетали:\n- Получатель: ООО «ТехноПартнер»\n- Сумма: 125 000 руб.\n- Перейдите: https://corporate-payment-portal.com/transfer\n\nЭто срочное поручение от руководства. Не задерживайте.\n\nГенеральный директор"
+            },
+            hotspots: [
+                { title: "Поддельный домен с заменой буквы", description: "c0mpany (ноль вместо 'o') — классическая техника замены символов. Невнимательный сотрудник легко не заметит." },
+                { title: "Авторитет руководства", description: "Письмо якобы от CEO создаёт давление — сотрудники боятся ослушаться руководства." },
+                { title: "Срочность без возможности проверить", description: "«До конца дня», «не задерживайте» — специально не оставляет времени на звонок для проверки." }
+            ],
+            psychology: "Business Email Compromise (BEC) — одна из самых прибыльных схем. Эксплуатирует корпоративную иерархию и страх перед начальством."
+        },
+        {
+            id: 6, title: "Фишинг через сообщение о безопасности Google", difficulty: "advanced",
+            email: {
+                from: "google-noreply@security-alert.com",
+                subject: "Вход в аккаунт Google с нового устройства",
+                body: "Привет,\n\nМы заметили новый вход в ваш Google-аккаунт:\nУстройство: Windows PC\nМестоположение: Москва, Россия\nВремя: Сегодня, 23:47\n\nЕсли это были не вы, немедленно защитите аккаунт: https://google-accounts-security.com/review\n\nЕсли это были вы — никаких действий не требуется.\n\nС уважением,\nГруппа безопасности Google"
+            },
+            hotspots: [
+                { title: "Поддельный домен", description: "security-alert.com — не google.com. Настоящие письма от Google приходят только с @google.com или @accounts.google.com." },
+                { title: "Правдоподобные детали", description: "Конкретное устройство, город и время делают письмо убедительным — всё выглядит как реальное уведомление." },
+                { title: "Поддельная ссылка безопасности", description: "google-accounts-security.com — домен не принадлежит Google, несмотря на слова 'google' и 'security'." }
+            ],
+            psychology: "Эксплуатирует страх взлома и инстинкт немедленно «исправить угрозу». Письмо намеренно выглядит как настоящее уведомление безопасности."
+        }
+    ];
+
+    // ==================== Отрисовка теоретических примеров ====================
+    function initTheory() {
+        renderExhibits('all');
+
+        document.querySelectorAll('.difficulty-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.difficulty-btn').forEach(function(b) { b.classList.remove('active'); });
+                this.classList.add('active');
+                renderExhibits(this.dataset.difficulty);
+            });
+        });
+    }
+
+    function renderExhibits(difficulty) {
+        var container = document.getElementById('exhibits-container');
+        container.innerHTML = '';
+
+        var filtered = exhibitsDatabase.filter(function(e) {
+            return difficulty === 'all' || e.difficulty === difficulty;
+        });
+
+        filtered.forEach(function(exhibit) {
+            var badgeClass = exhibit.difficulty === 'beginner' ? 'beginner-badge' :
+                             exhibit.difficulty === 'advanced' ? 'advanced-badge' : 'expert-badge';
+            var badgeLabel = exhibit.difficulty === 'beginner' ? 'Начальный' :
+                             exhibit.difficulty === 'advanced' ? 'Средний' : 'Сложный';
+
+            var hotspotsHtml = exhibit.hotspots.map(function(h) {
+                return '<div class="hotspot" onclick="this.classList.toggle(\'open\')">' +
+                    '<div class="hotspot-title"><i class="fas fa-exclamation-triangle"></i>' + h.title + '</div>' +
+                    '<div class="hotspot-description">' + h.description + '</div>' +
+                    '</div>';
+            }).join('');
+
+            var emailBodyHtml = exhibit.email.body.replace(/\n/g, '<br>');
+
+            var card = document.createElement('div');
+            card.className = 'exhibit';
+            card.dataset.difficulty = exhibit.difficulty;
+            card.innerHTML =
+                '<div class="exhibit-header">' +
+                    '<div class="exhibit-title">' + exhibit.title + '</div>' +
+                    '<div class="exhibit-difficulty ' + badgeClass + '">' + badgeLabel + '</div>' +
+                '</div>' +
+                '<div class="exhibit-content">' +
+                    '<div class="phishing-email">' +
+                        '<div class="email-header">' +
+                            '<div class="email-from">От: ' + exhibit.email.from + '</div>' +
+                            '<div class="email-subject">Тема: ' + exhibit.email.subject + '</div>' +
+                        '</div>' +
+                        '<div style="font-size:0.9rem;">' + emailBodyHtml + '</div>' +
+                    '</div>' +
+                    '<p style="color: #a0aec0; font-size: 0.9rem; margin-bottom: 12px;"><i class="fas fa-mouse-pointer"></i> Нажми на красные блоки, чтобы узнать о каждом признаке:</p>' +
+                    hotspotsHtml +
+                    '<div class="psychology-breakdown">' +
+                        '<div class="psychology-title"><i class="fas fa-brain"></i> Психологический приём</div>' +
+                        '<div style="color: #cbd5e0; font-size: 0.9rem;">' + exhibit.psychology + '</div>' +
+                    '</div>' +
+                '</div>';
+
+            container.appendChild(card);
+        });
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<p style="color: #a0aec0; text-align: center; padding: 40px;">Нет примеров для выбранного уровня.</p>';
+        }
+    }
+
+    // ==================== Аркадная игра ====================
+    var arcadeGameInterval = null;
+    var arcadeScore = 0;
+    var arcadeTimeLeft = 30;
+
+    var emailPool = [
+        { from: 'security@bank-ru-secure.net', subject: 'Срочно обновите данные', body: 'Ваш счёт будет заблокирован...', isPhishing: true },
+        { from: 'hr@ourcompany.ru', subject: 'График отпусков на следующий месяц', body: 'Во вложении утверждённый график...', isPhishing: false },
+        { from: 'ceo-alert@c0mpany.ru', subject: 'Срочный перевод клиенту', body: 'Переведите 100 000 руб. по ссылке...', isPhishing: true },
+        { from: 'it-support@ourcompany.ru', subject: 'Плановое обновление ПО', body: 'Напоминание: обновление системы в пятницу...', isPhishing: false },
+        { from: 'amazon@orders-confirm.info', subject: 'Проблема с вашим заказом', body: 'Не удалось списать средства, подтвердите...', isPhishing: true },
+        { from: 'google-noreply@security-alert.com', subject: 'Вход с нового устройства', body: 'Если это были не вы, перейдите по ссылке...', isPhishing: true },
+        { from: 'delivery@pochta-track.info', subject: 'Ваша посылка задержана', body: 'Для получения оплатите пошлину...', isPhishing: true },
+        { from: 'admin@ourcompany.ru', subject: 'Корпоративная встреча в пятницу', body: 'Встреча состоится в 15:00 в зале A...', isPhishing: false },
+        { from: 'support@paypal-secure-center.com', subject: 'Ваш аккаунт ограничен', body: 'Войдите для восстановления доступа...', isPhishing: true },
+        { from: 'newsletter@medium.com', subject: 'Подборка статей за неделю', body: 'Вот что читали на этой неделе...', isPhishing: false }
+    ];
+
+    window.startArcadeGame = function() {
+        var detectiveSection = document.getElementById('detective');
+        var investigationsList = detectiveSection.querySelector('.investigations-list');
+        var existingGame = detectiveSection.querySelector('.game-container');
+        if (existingGame) existingGame.remove();
+
+        investigationsList.classList.add('hidden');
+
+        var gameContainer = document.createElement('div');
+        gameContainer.className = 'game-container';
+        gameContainer.innerHTML =
+            '<h3 style="color: var(--primary-color); margin-bottom: 20px; text-align: center; font-size: 1.5rem;">Спаси сотрудника!</h3>' +
+            '<div class="game-instruction">' +
+                '<i class="fas fa-info-circle" style="color: var(--safe-color); margin-right: 8px;"></i>' +
+                '<strong>Правила:</strong> Кликайте на <strong style="color: #e53e3e;">фишинговые</strong> письма, чтобы их удалить. ' +
+                'Кликнете на настоящее письмо — игра закончится. Смотрите на домен отправителя и содержание.' +
+            '</div>' +
+            '<div class="game-stats">' +
+                '<div>⏱️ Время: <span id="game-time">30</span>с</div>' +
+                '<div>💯 Счёт: <span id="game-score">0</span></div>' +
+            '</div>' +
+            '<div class="game-emails" id="game-emails-container"></div>' +
+            '<div style="text-align: center; margin-top: 20px;">' +
+                '<button class="btn btn-secondary" onclick="exitArcadeGame()">Выйти из игры</button>' +
+            '</div>';
+
+        detectiveSection.appendChild(gameContainer);
+
+        for (var i = 0; i < 4; i++) { addRandomEmail(); }
+
+        arcadeScore = 0;
+        arcadeTimeLeft = 30;
+        updateArcadeDisplay();
+
+        if (arcadeGameInterval) clearInterval(arcadeGameInterval);
+        arcadeGameInterval = setInterval(function() {
+            arcadeTimeLeft--;
+            var timeEl = document.getElementById('game-time');
+            if (timeEl) timeEl.textContent = arcadeTimeLeft;
+            if (arcadeTimeLeft <= 0) {
+                clearInterval(arcadeGameInterval);
+                arcadeGameInterval = null;
+                alert('⏰ Время вышло! Игра окончена. Ваш счёт: ' + arcadeScore);
+                exitArcadeGame();
+            }
+        }, 1000);
+    };
+
+    function addRandomEmail() {
+        var container = document.getElementById('game-emails-container');
+        if (!container) return;
+        var randomIndex = Math.floor(Math.random() * emailPool.length);
+        var email = emailPool[randomIndex];
+        var card = document.createElement('div');
+        card.className = 'game-email-card';
+        card.dataset.phishing = email.isPhishing;
+        card.innerHTML =
+            '<div class="game-email-from">📨 ' + email.from + '</div>' +
+            '<div class="game-email-subject">' + email.subject + '</div>' +
+            '<div class="game-email-body">' + email.body + '</div>';
+        card.addEventListener('click', handleArcadeClick);
+        container.appendChild(card);
+    }
+
+    function handleArcadeClick(e) {
+        var card = e.currentTarget;
+        var isPhishing = card.dataset.phishing === 'true';
+        if (isPhishing) {
+            card.remove();
+            arcadeScore += 10;
+            var scoreEl = document.getElementById('game-score');
+            if (scoreEl) scoreEl.textContent = arcadeScore;
+            addRandomEmail();
+        } else {
+            clearInterval(arcadeGameInterval);
+            arcadeGameInterval = null;
+            alert('😵 Ошибка! Это было настоящее письмо. Игра окончена. Ваш счёт: ' + arcadeScore);
+            exitArcadeGame();
+        }
+    }
+
+    function updateArcadeDisplay() {
+        var timeEl = document.getElementById('game-time');
+        var scoreEl = document.getElementById('game-score');
+        if (timeEl) timeEl.textContent = arcadeTimeLeft;
+        if (scoreEl) scoreEl.textContent = arcadeScore;
+    }
+
+    window.exitArcadeGame = function() {
+        if (arcadeGameInterval) { clearInterval(arcadeGameInterval); arcadeGameInterval = null; }
+        var detectiveSection = document.getElementById('detective');
+        var investigationsList = detectiveSection.querySelector('.investigations-list');
+        var gameContainer = detectiveSection.querySelector('.game-container');
+        if (gameContainer) gameContainer.remove();
+        if (investigationsList) investigationsList.classList.remove('hidden');
+    };
+
+    // ==================== Инициализация ====================
+    document.addEventListener('DOMContentLoaded', function() {
+        setupNavigation();
+        initTheory();
+    });
+</script>
+</body>
+</html>
